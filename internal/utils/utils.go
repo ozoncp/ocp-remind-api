@@ -1,5 +1,7 @@
 package utils
 
+import "errors"
+
 func min(a, b int) int {
 	if a < b {
 		return a
@@ -15,14 +17,25 @@ func getChunksCount(sliceSize, batchSlice int) int {
 	return result
 }
 
-func FilterSlice(inputSlice []int, filter map[int]struct{}) []int {
-	result := make([]int, 0, len(inputSlice))
-	for i := range inputSlice {
-		if _, ok := filter[inputSlice[i]]; !ok {
-			result = append(result, inputSlice[i])
+var filter = map[int]struct{}{
+	3:  {},
+	5:  {},
+	7:  {},
+	11: {},
+	13: {},
+	17: {},
+	19: {},
+}
+
+func FilterSlice(inputSlice []int) []int {
+	for i := 0; i < len(inputSlice); i++ {
+		if _, ok := filter[inputSlice[i]]; ok {
+			inputSlice[i] = inputSlice[len(inputSlice)-1]
+			inputSlice = inputSlice[:len(inputSlice)-1]
+			i -= 1
 		}
 	}
-	return result
+	return inputSlice
 }
 
 func BatchSlice(slice []int, chunkSize int) [][]int {
@@ -31,18 +44,20 @@ func BatchSlice(slice []int, chunkSize int) [][]int {
 	pos, chunkCounter, copySize := 0, 0, 0
 	for pos < len(slice) {
 		copySize = min(len(slice)-pos, chunkSize)
-		resultSlice[chunkCounter] = make([]int, copySize)
-		copy(resultSlice[chunkCounter], slice[pos:pos+copySize])
+		resultSlice[chunkCounter] = slice[pos : pos+copySize]
 		pos += copySize
 		chunkCounter++
 	}
 	return resultSlice
 }
 
-func MirrorMap(sourceMap map[string]int) map[int]string {
+func MirrorMap(sourceMap map[string]int) (map[int]string, error) {
+	if sourceMap == nil {
+		return nil, errors.New("source map is nil")
+	}
 	outMap := make(map[int]string, len(sourceMap))
 	for key, value := range sourceMap {
 		outMap[value] = key
 	}
-	return outMap
+	return outMap, nil
 }
