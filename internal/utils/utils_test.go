@@ -3,17 +3,28 @@ package utils
 import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"reflect"
 	"testing"
 )
 
 func TestMirror(t *testing.T) {
-	source := make(map[string]int)
-	source["one"] = 1
-	source["two"] = 2
-	source["three"] = 3
-	mirrored := Mirror(source)
-	assert.Equal(t, len(mirrored), len(source), "map size should be the same")
-	assert.Contains(t, mirrored, 1, "map should contains this key")
+	var tests = []struct {
+		input    map[string]int
+		expected map[int]string
+	}{
+		{map[string]int{"one": 1, "two": 2, "three": 3},
+			map[int]string{1: "one", 2: "two", 3: "three"},
+		},
+		{map[string]int{"Russia": 3, "Finland": 3, "France": 5},
+			map[int]string{3: "Finland", 5: "France"},
+		},
+	}
+
+	for _, test := range tests {
+		result := Mirror(test.input)
+		assert.True(t, reflect.DeepEqual(result, test.expected))
+	}
+
 	require.NotPanics(t, func() { var nilMap map[string]int; Mirror(nilMap) },
 		"func panic on input is nil")
 }
