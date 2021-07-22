@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"github.com/ozoncp/ocp-remind-api/internal/models"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"testing"
@@ -52,5 +53,24 @@ func TestFilter(t *testing.T) {
 
 	for _, test := range tests {
 		assert.Equal(t, Filter(test.input), test.expected)
+	}
+}
+
+func TestToMap(t *testing.T) {
+	var tests = []struct {
+		input    []models.Remind
+		expected map[uint64]models.Remind
+	}{
+		{[]models.Remind{{1, 1, 1000, "first"},
+			{2, 2, 2000, "second"},
+			{3, 3, 3000, "third"}},
+			map[uint64]models.Remind{1: {1, 1, 1000, "first"},
+				2: {2, 2, 2000, "second"},
+				3: {3, 3, 3000, "third"}}},
+	}
+	for _, test := range tests {
+		result, _ := ToMap(test.input)
+		assert.Equal(t, result, test.expected)
+
 	}
 }

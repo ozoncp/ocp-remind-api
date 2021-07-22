@@ -1,5 +1,7 @@
 package utils
 
+import "github.com/ozoncp/ocp-remind-api/internal/models"
+
 var filter = map[int]struct{}{
 	3:  {},
 	5:  {},
@@ -44,4 +46,12 @@ func Mirror(source map[string]int) map[int]string {
 		result[value] = key
 	}
 	return result
+}
+
+func ToMap(reminds []models.Remind) (map[uint64]models.Remind, error) {
+	result := make(map[uint64]models.Remind, len(reminds))
+	for _, remind := range reminds {
+		result[remind.Id] = remind
+	}
+	return result, nil
 }
