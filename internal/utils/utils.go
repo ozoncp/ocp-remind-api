@@ -1,22 +1,5 @@
 package utils
 
-import "errors"
-
-func min(a, b int) int {
-	if a < b {
-		return a
-	}
-	return b
-}
-
-func getChunksCount(sliceSize, batchSlice int) int {
-	result := sliceSize / batchSlice
-	if sliceSize%batchSlice != 0 {
-		result++
-	}
-	return result
-}
-
 var filter = map[int]struct{}{
 	3:  {},
 	5:  {},
@@ -27,37 +10,38 @@ var filter = map[int]struct{}{
 	19: {},
 }
 
-func FilterSlice(inputSlice []int) []int {
-	for i := 0; i < len(inputSlice); i++ {
-		if _, ok := filter[inputSlice[i]]; ok {
-			inputSlice[i] = inputSlice[len(inputSlice)-1]
-			inputSlice = inputSlice[:len(inputSlice)-1]
+func Filter(input []int) []int {
+	for i := 0; i < len(input); i++ {
+		if _, ok := filter[input[i]]; ok {
+			input[i] = input[len(input)-1]
+			input = input[:len(input)-1]
 			i -= 1
 		}
 	}
-	return inputSlice
+	return input
 }
 
-func BatchSlice(slice []int, chunkSize int) [][]int {
-	chunksCount := getChunksCount(len(slice), chunkSize)
-	resultSlice := make([][]int, chunksCount)
-	pos, chunkCounter, copySize := 0, 0, 0
-	for pos < len(slice) {
-		copySize = min(len(slice)-pos, chunkSize)
-		resultSlice[chunkCounter] = slice[pos : pos+copySize]
-		pos += copySize
-		chunkCounter++
+func Batch(input []int, size int) [][]int {
+	result := make([][]int, (len(input)+size-1)/size)
+	pos, counter := 0, 0
+	for pos < len(input) {
+		if len(input)-pos < size {
+			size = len(input) - pos
+		}
+		result[counter] = input[pos : pos+size]
+		pos += size
+		counter++
 	}
-	return resultSlice
+	return result
 }
 
-func MirrorMap(sourceMap map[string]int) (map[int]string, error) {
-	if sourceMap == nil {
-		return nil, errors.New("source map is nil")
+func Mirror(source map[string]int) map[int]string {
+	if len(source) == 0 {
+		return map[int]string{}
 	}
-	outMap := make(map[int]string, len(sourceMap))
-	for key, value := range sourceMap {
-		outMap[value] = key
+	result := make(map[int]string, len(source))
+	for key, value := range source {
+		result[value] = key
 	}
-	return outMap, nil
+	return result
 }
