@@ -11,27 +11,30 @@ var filter = map[int]struct{}{
 }
 
 func Filter(input []int) []int {
-	for i := 0; i < len(input); i++ {
-		if _, ok := filter[input[i]]; ok {
-			input[i] = input[len(input)-1]
-			input = input[:len(input)-1]
-			i -= 1
+	var n int
+	for _, v := range input {
+		if _, ok := filter[v]; !ok {
+			input[n] = v
+			n++
 		}
 	}
-	return input
+
+	return input[:n]
 }
 
 func Batch(input []int, size int) [][]int {
-	result := make([][]int, (len(input)+size-1)/size)
-	pos, counter := 0, 0
-	for pos < len(input) {
-		if len(input)-pos < size {
-			size = len(input) - pos
-		}
-		result[counter] = input[pos : pos+size]
-		pos += size
-		counter++
+	if len(input) <= size {
+		return [][]int{input}
 	}
+
+	result := make([][]int, 0, (len(input)+size-1)/size)
+	for i, j := 0, size; j <= len(input); i, j = i+size, j+size {
+		result = append(result, input[i:j])
+	}
+	if v := len(input) % size; v != 0 {
+		result = append(result, input[len(input)-v:])
+	}
+
 	return result
 }
 
