@@ -1,22 +1,36 @@
 package utils
 
 import (
-	"github.com/ozoncp/ocp-remind-api/internal/models"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"reflect"
 	"testing"
 )
 
 func TestMirror(t *testing.T) {
-	source := make(map[string]int)
-	source["one"] = 1
-	source["two"] = 2
-	source["three"] = 3
-	mirrored := Mirror(source)
-	assert.Equal(t, len(mirrored), len(source), "map size should be the same")
-	assert.Contains(t, mirrored, 1, "map should contains this key")
+	var tests = []struct {
+		name string
+		input    map[string]int
+		expected map[int]string
+	}{
+		{"three different pairs",
+			map[string]int{"one": 1, "two": 2, "three": 3},
+			map[int]string{1: "one", 2: "two", 3: "three"},
+		},
+		{"three pairs, two are same",
+			map[string]int{"Russia": 3, "Finland": 3, "France": 5},
+			map[int]string{3: "Finland", 5: "France"},
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t* testing.T){
+			assert.True(t, reflect.DeepEqual(Mirror(test.input), test.expected))
+		})
+	}
+
 	require.NotPanics(t, func() { var nilMap map[string]int; Mirror(nilMap) },
-		"func panic on input is nil")
+		"function panics on nil input")
 }
 
 func TestBatch(t *testing.T) {
@@ -44,7 +58,7 @@ func TestFilter(t *testing.T) {
 		expected []int
 	}{
 		{[]int{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20},
-			[]int{1, 2, 20, 4, 18, 6, 16, 8, 9, 10, 15, 12, 14}},
+			[]int{1, 2, 4, 6, 8, 9, 10, 12, 14, 15, 16, 18, 20}},
 		{[]int{},
 			[]int{}},
 		{[]int{100, 200, 300},
@@ -56,21 +70,4 @@ func TestFilter(t *testing.T) {
 	}
 }
 
-func TestToMap(t *testing.T) {
-	var tests = []struct {
-		input    []models.Remind
-		expected map[uint64]models.Remind
-	}{
-		{[]models.Remind{{1, 1, 1000, "first"},
-			{2, 2, 2000, "second"},
-			{3, 3, 3000, "third"}},
-			map[uint64]models.Remind{1: {1, 1, 1000, "first"},
-				2: {2, 2, 2000, "second"},
-				3: {3, 3, 3000, "third"}}},
-	}
-	for _, test := range tests {
-		result, _ := ToMap(test.input)
-		assert.Equal(t, result, test.expected)
 
-	}
-}
