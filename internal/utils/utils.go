@@ -48,6 +48,3 @@ func Mirror(source map[string]int) map[int]string {
 	}
 	return result
 }
-
-
-

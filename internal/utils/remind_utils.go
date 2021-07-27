@@ -1,23 +1,25 @@
 package utils
 
 import (
-	"errors"
+	"fmt"
+
+	"go.uber.org/multierr"
+
 	"github.com/ozoncp/ocp-remind-api/internal/models"
 )
 
-func Map(reminds []models.Remind) (map[uint64]models.Remind, error) {
+func Map(reminds []models.Remind) (map[uint64]models.Remind, []error) {
 	result := make(map[uint64]models.Remind, len(reminds))
-	var err error = nil
+	var err error
 	for _, remind := range reminds {
 		if _, contains := result[remind.Id]; !contains {
 			result[remind.Id] = remind
 		} else {
-			err = errors.New("there are structs with same ids.")
+			err = multierr.Append(err, fmt.Errorf("%d: already persists in as a reminder", remind.Id))
 		}
 	}
-	return result, err
+	return result, multierr.Errors(err)
 }
-
 
 func BatchReminds(input []models.Remind, size int) [][]models.Remind {
 	if len(input) <= size {
