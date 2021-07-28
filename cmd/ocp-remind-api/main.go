@@ -6,15 +6,21 @@ import (
 )
 
 func LoadConfiguration(filePath string) error {
-	for i := 0; i < 100; i++ {
-		err := func() error {
-			file, err := os.Open(filePath)
+	openFile := func() error {
+		file, err := os.Open(filePath)
+		if err != nil {
+			return err
+		}
+		defer func() {
+			err := file.Close()
 			if err != nil {
-				return err
+				fmt.Println("error on file closing...")
 			}
-			defer file.Close()
-			return nil
 		}()
+		return nil
+	}
+	for i := 0; i < 10; i++ {
+		err := openFile()
 		if err != nil {
 			return err
 		}
