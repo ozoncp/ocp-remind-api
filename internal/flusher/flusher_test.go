@@ -5,7 +5,6 @@ import (
 	"time"
 
 	"github.com/golang/mock/gomock"
-	. "github.com/onsi/ginkgo"
 	"github.com/onsi/gomega"
 
 	"github.com/ozoncp/ocp-remind-api/internal/flusher"
@@ -17,7 +16,7 @@ var _ = Describe("Flusher", func() {
 	var (
 		mr        *mocks.MockRepo
 		ctrl      *gomock.Controller
-		fl        flusher.Flusher
+		sut       flusher.Flusher
 		input     []models.Remind
 		chunkSize int
 	)
@@ -27,7 +26,7 @@ var _ = Describe("Flusher", func() {
 		chunkSize = 2
 		ctrl = gomock.NewController(GinkgoT())
 		mr = mocks.NewMockRepo(ctrl)
-		fl = flusher.NewFlusher(mr, chunkSize)
+		sut = flusher.NewFlusher(mr, chunkSize)
 		input = []models.Remind{
 			0: models.NewRemind(1, 2, now, "birthday"),
 			1: models.NewRemind(2, 2, now, "party"),
@@ -47,7 +46,7 @@ var _ = Describe("Flusher", func() {
 					Add(gomock.Any()).
 					Return(nil).
 					AnyTimes()
-				gomega.Expect(fl.Flush(input)).Should(gomega.BeEmpty(),
+				gomega.Expect(sut.Flush(input)).Should(gomega.BeEmpty(),
 					"without errors")
 			})
 		})
@@ -57,7 +56,7 @@ var _ = Describe("Flusher", func() {
 					Add(gomock.Any()).
 					Return(errors.New("error on add")).
 					AnyTimes()
-				gomega.Expect(fl.Flush(input)).To(gomega.Equal(input),
+				gomega.Expect(sut.Flush(input)).To(gomega.Equal(input),
 					"all errors")
 			})
 		})
@@ -71,7 +70,7 @@ var _ = Describe("Flusher", func() {
 					Add(gomock.Any()).
 					Return(nil).
 					AnyTimes()
-				gomega.Expect(fl.Flush(input)).To(gomega.Equal(input[0:2]),
+				gomega.Expect(sut.Flush(input)).To(gomega.Equal(input[0:2]),
 					"last two reminds saved without error")
 			})
 		})
