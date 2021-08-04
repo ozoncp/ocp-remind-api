@@ -5,8 +5,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/ozoncp/ocp-remind-api/internal/models"
 	"github.com/stretchr/testify/assert"
+
+	"github.com/ozoncp/ocp-remind-api/internal/models"
 )
 
 func TestMap(t *testing.T) {
