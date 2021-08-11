@@ -15,32 +15,28 @@ type Saver interface {
 }
 
 type remindSaver struct {
-	flusher   flusher.Flusher
-	ticker    *time.Ticker
-	reminds   []models.Remind
-	saveChan  chan models.Remind
-	closeChan chan struct{}
+	flusher flusher.Flusher
+	period  time.Duration
+	bufC    chan models.Remind
+	closeC  chan struct{}
+	reminds []models.Remind
 }
 
-func (saver *remindSaver) Init() {
+func (rs *remindSaver) Init() {
 	go func() {
-		defer saver.ticker.Stop()
+		ticker := time.NewTicker(rs.period)
+		defer ticker.Stop()
 
 		for {
 			select {
-			case remind := <-saver.saveChan:
-				saver.reminds = append(saver.reminds, remind)
-			case <-saver.ticker.C:
-				if len(saver.reminds) != 0 {
-					saver.reminds = saver.flusher.Flush(saver.reminds)
+			case remind := <-rs.bufC:
+				rs.reminds = append(rs.reminds, remind)
+			case <-ticker.C:
+				rs.reminds = rs.flusher.Flush(rs.reminds)
+			case <-rs.closeC:
+				if len(rs.reminds) != 0 {
+					rs.flusher.Flush(rs.reminds)
 				}
-			case <-saver.closeChan:
-				if len(saver.reminds) != 0 {
-					saver.flusher.Flush(saver.reminds)
-				}
-
-				close(saver.saveChan)
-				close(saver.closeChan)
 
 				return
 			}
@@ -48,11 +44,11 @@ func (saver *remindSaver) Init() {
 	}()
 }
 
-var ErrCapacity = errors.New("there is no avaible capacity")
+var ErrCapacity = errors.New("there is no available capacity")
 
-func (saver remindSaver) Save(remind models.Remind) error {
-	if len(saver.reminds) < cap(saver.reminds) {
-		saver.saveChan <- remind
+func (rs remindSaver) Save(remind models.Remind) error {
+	if len(rs.reminds) < cap(rs.reminds) {
+		rs.bufC <- remind
 
 		return nil
 	}
@@ -60,23 +56,36 @@ func (saver remindSaver) Save(remind models.Remind) error {
 	return ErrCapacity
 }
 
-func (saver remindSaver) Close() {
-	saver.closeChan <- struct{}{}
+func (rs remindSaver) Close() {
+	rs.closeC <- struct{}{}
+	close(rs.bufC)
+	close(rs.closeC)
 }
 
-func NewSaver(capacity uint, flusher flusher.Flusher, duration ...time.Duration) Saver {
-	d := 5 * time.Second
-	if len(duration) > 0 {
-		d = duration[0]
+type Option func(*remindSaver)
+
+func WithDuration(v time.Duration) Option {
+	return func(s *remindSaver) {
+		if v > 0 {
+			s.period = v
+		}
+	}
+}
+
+//This function in addition to creating object,
+//also initialize it (call Init() method)
+func NewSaver(capacity uint, flusher flusher.Flusher, opts ...Option) Saver {
+	saver := remindSaver{
+		flusher: flusher,
+		period:  5 * time.Second,
+		reminds: make([]models.Remind, 0, capacity),
+		bufC:    make(chan models.Remind),
+		closeC:  make(chan struct{}),
+	}
+	for _, opt := range opts {
+		opt(&saver)
 	}
 
-	saver := remindSaver{
-		flusher:   flusher,
-		ticker:    time.NewTicker(d),
-		reminds:   make([]models.Remind, 0, capacity),
-		saveChan:  make(chan models.Remind),
-		closeChan: make(chan struct{}),
-	}
 	saver.Init()
 
 	return &saver

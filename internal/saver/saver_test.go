@@ -38,7 +38,7 @@ var _ = Describe("Saver", func() {
 		Context("Save 2 reminds into 2 capacity saver", func() {
 			It("Flusher should be called 1 time", func() {
 				mockFlusher := mocks.NewMockFlusher(ctrl)
-				sut = saver.NewSaver(2, mockFlusher, 1*time.Millisecond)
+				sut = saver.NewSaver(2, mockFlusher, saver.WithDuration(1*time.Millisecond))
 				gomega.Expect(sut.Save(input[0])).Should(BeNil())
 				gomega.Expect(sut.Save(input[1])).Should(BeNil())
 				mockFlusher.EXPECT().Flush(gomock.Any()).Return([]models.Remind{}).MinTimes(0).MaxTimes(1)
@@ -50,7 +50,7 @@ var _ = Describe("Saver", func() {
 		Context("Save 2 reminds into 0 capacity saver", func() {
 			It("Flusher should be called 0 times", func() {
 				mockFlusher := mocks.NewMockFlusher(ctrl)
-				sut = saver.NewSaver(0, mockFlusher, 1*time.Second)
+				sut = saver.NewSaver(0, mockFlusher, saver.WithDuration(1*time.Second))
 				gomega.Expect(sut.Save(input[0])).ShouldNot(BeNil())
 				gomega.Expect(sut.Save(input[1])).ShouldNot(BeNil())
 				mockFlusher.EXPECT().Flush(gomock.Any()).Return([]models.Remind{}).Times(0)
@@ -61,7 +61,7 @@ var _ = Describe("Saver", func() {
 		Context("Save 3 reminds into 2 capacity saver", func() {
 			It("Flusher should be called 2 times", func() {
 				mockFlusher := mocks.NewMockFlusher(ctrl)
-				sut = saver.NewSaver(5, mockFlusher, 1*time.Millisecond)
+				sut = saver.NewSaver(5, mockFlusher, saver.WithDuration(1*time.Millisecond))
 				gomega.Expect(sut.Save(input[0])).Should(BeNil())
 				gomega.Expect(sut.Save(input[1])).Should(BeNil())
 				mockFlusher.EXPECT().Flush(gomock.Any()).Return([]models.Remind{}).MinTimes(0).MaxTimes(1)
@@ -70,5 +70,14 @@ var _ = Describe("Saver", func() {
 				mockFlusher.EXPECT().Flush(gomock.Any()).Return([]models.Remind{}).MinTimes(1).MaxTimes(2)
 			})
 		})
+		//Context("Do not save reminds", func() {
+		//	It("Flusher should be called 2 times by ticker", func() {
+		//		mockFlusher := mocks.NewMockFlusher(ctrl)
+		//		sut = saver.NewSaver(5, mockFlusher, saver.WithDuration(50*time.Millisecond))
+		//		//здесь я хочу подождать пару секунд, чтобы сработал тикер
+		//		//что-то типа такого: time.Sleep(3 * time.Second)
+		//		mockFlusher.EXPECT().Flush(gomock.Any()).Return([]models.Remind{}).MinTimes(3).MaxTimes(8)
+		//	})
+		//})
 	})
 })
