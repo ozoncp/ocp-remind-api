@@ -14,24 +14,14 @@ func TestSaver(t *testing.T) { //nolint:paralleltest
 
 // Declarations for Ginkgo DSL
 
-var GinkgoT = ginkgo.GinkgoT   //nolint:gofumpt,gochecknoglobals
-var RunSpecs = ginkgo.RunSpecs //nolint:gochecknoglobals
-
-var Fail = ginkgo.Fail //nolint:gochecknoglobals
-
-var Describe = ginkgo.Describe //nolint:gochecknoglobals
-
-var Context = ginkgo.Context //nolint:gochecknoglobals
-
-var It = ginkgo.It //nolint:gochecknoglobals
-
-var BeforeEach = ginkgo.BeforeEach //nolint:gochecknoglobals
-
-var AfterEach = ginkgo.AfterEach //nolint:gochecknoglobals
+var GinkgoT = ginkgo.GinkgoT
+var RunSpecs = ginkgo.RunSpecs
+var Fail = ginkgo.Fail
+var Describe = ginkgo.Describe
+var Context = ginkgo.Context
+var It = ginkgo.It
+var BeforeEach = ginkgo.BeforeEach
+var AfterEach = ginkgo.AfterEach
 
 // Declarations for Gomega DSL
 var RegisterFailHandler = gomega.RegisterFailHandler
-
-// Declarations for Gomega Matchers
-
-var BeNil = gomega.BeNil

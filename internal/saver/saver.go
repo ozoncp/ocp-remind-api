@@ -1,7 +1,6 @@
 package saver
 
 import (
-	"errors"
 	"time"
 
 	"github.com/ozoncp/ocp-remind-api/internal/flusher"
@@ -9,7 +8,7 @@ import (
 )
 
 type Saver interface {
-	Save(remind models.Remind) error
+	Save(remind models.Remind)
 	Init()
 	Close()
 }
@@ -44,16 +43,8 @@ func (rs *remindSaver) Init() {
 	}()
 }
 
-var ErrCapacity = errors.New("there is no available capacity")
-
-func (rs remindSaver) Save(remind models.Remind) error {
-	if len(rs.reminds) < cap(rs.reminds) {
-		rs.bufC <- remind
-
-		return nil
-	}
-
-	return ErrCapacity
+func (rs remindSaver) Save(remind models.Remind) {
+	rs.bufC <- remind
 }
 
 func (rs remindSaver) Close() {
