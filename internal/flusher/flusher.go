@@ -18,15 +18,29 @@ type remindsFlusher struct {
 func (f *remindsFlusher) Flush(reminds []models.Remind) []models.Remind {
 	batched := utils.BatchReminds(reminds, f.chunkSize)
 	notAdded := make([]models.Remind, 0, len(reminds))
+
 	for _, v := range batched {
 		err := f.repo.Add(v)
 		if err != nil {
 			notAdded = append(notAdded, v...)
 		}
 	}
+
 	return notAdded
+
 }
 
 func NewFlusher(r repo.RemindsRepo, chunkSize int) Flusher {
 	return &remindsFlusher{repo: r, chunkSize: chunkSize}
+}
+
+type MockFlusher struct {
+	Counter int
+}
+
+func (mf *MockFlusher) Flush([]models.Remind) []models.Remind {
+	mf.Counter++
+
+	return make([]models.Remind, 0)
+
 }

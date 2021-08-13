@@ -14,7 +14,7 @@ import (
 
 var _ = Describe("Flusher", func() {
 	var (
-		mr        *mocks.MockRepo
+		mr        *mocks.MockRemindsRepo
 		ctrl      *gomock.Controller
 		sut       flusher.Flusher
 		input     []models.Remind
@@ -25,7 +25,7 @@ var _ = Describe("Flusher", func() {
 		now := time.Now()
 		chunkSize = 2
 		ctrl = gomock.NewController(GinkgoT())
-		mr = mocks.NewMockRepo(ctrl)
+		mr = mocks.NewMockRemindsRepo(ctrl)
 		sut = flusher.NewFlusher(mr, chunkSize)
 		input = []models.Remind{
 			0: models.NewRemind(1, 2, now, "birthday"),
