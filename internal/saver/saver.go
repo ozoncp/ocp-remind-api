@@ -48,9 +48,8 @@ func (rs remindSaver) Save(remind models.Remind) {
 }
 
 func (rs remindSaver) Close() {
-	rs.closeC <- struct{}{}
-	close(rs.bufC)
 	close(rs.closeC)
+	close(rs.bufC)
 }
 
 type Option func(*remindSaver)

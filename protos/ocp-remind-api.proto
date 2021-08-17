@@ -1,0 +1,66 @@
+syntax = "proto3";
+package ocp.reminds.api;
+
+option go_package = "github.com/ozoncp/ocp-remind-api/pkg";
+
+import "google/api/annotations.proto";
+import "google/protobuf/empty.proto";
+import "google/protobuf/timestamp.proto";
+
+
+service RemindApiV1{
+  rpc CreateRemind(CreateRemindRequest) returns (Remind){
+    option (google.api.http) = {
+      post: "/v1/create"
+      body: "*"
+    };
+  }
+
+  rpc DescribeRemind(DescribeRemindRequest) returns (Remind){
+    option (google.api.http) = {
+      get: "/v1/describe/{RemindId}"
+    };
+  }
+
+  rpc ListReminds(google.protobuf.Empty) returns (ListRemindsResponse){
+    option (google.api.http) = {
+      post: "/v1/list"
+    };
+  }
+
+  rpc RemoveRemind(RemoveRemindRequest) returns (RemoveRemindResponse){
+    option (google.api.http) = {
+     delete: "/v1/remove"
+    };
+  }
+}
+
+message RemoveRemindResponse{
+  bool Result = 1;
+  optional string ErrMsg = 2;
+}
+
+message RemoveRemindRequest{
+  uint64 Id = 1;
+}
+
+message ListRemindsResponse{
+  repeated uint64 Ids = 1;
+}
+
+message DescribeRemindRequest{
+  uint64 RemindId = 1;
+}
+
+message CreateRemindRequest{
+  uint64 UserId = 1;
+  string Text = 2;
+  google.protobuf.Timestamp time = 3;
+}
+
+message Remind{
+  uint64 Id = 1;
+  uint64 UserId = 2;
+  string Text = 3;
+  int64 UnixTime = 4;
+}
