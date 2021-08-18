@@ -48,7 +48,7 @@
         ]
       }
     },
-    "/v1/describe/{RemindId}": {
+    "/v1/describe/{remindId}": {
       "get": {
         "operationId": "RemindApiV1_DescribeRemind",
         "responses": {
@@ -67,7 +67,7 @@
         },
         "parameters": [
           {
-            "name": "RemindId",
+            "name": "remindId",
             "in": "path",
             "required": true,
             "type": "string",
@@ -120,7 +120,7 @@
         },
         "parameters": [
           {
-            "name": "Id",
+            "name": "id",
             "in": "query",
             "required": false,
             "type": "string",
@@ -137,11 +137,11 @@
     "apiCreateRemindRequest": {
       "type": "object",
       "properties": {
-        "UserId": {
+        "userId": {
           "type": "string",
           "format": "uint64"
         },
-        "Text": {
+        "text": {
           "type": "string"
         },
         "time": {
@@ -153,7 +153,7 @@
     "apiListRemindsResponse": {
       "type": "object",
       "properties": {
-        "Ids": {
+        "ids": {
           "type": "array",
           "items": {
             "type": "string",
@@ -165,18 +165,18 @@
     "apiRemind": {
       "type": "object",
       "properties": {
-        "Id": {
+        "id": {
           "type": "string",
           "format": "uint64"
         },
-        "UserId": {
+        "userId": {
           "type": "string",
           "format": "uint64"
         },
-        "Text": {
+        "text": {
           "type": "string"
         },
-        "UnixTime": {
+        "unixTime": {
           "type": "string",
           "format": "int64"
         }
@@ -185,10 +185,10 @@
     "apiRemoveRemindResponse": {
       "type": "object",
       "properties": {
-        "Result": {
+        "result": {
           "type": "boolean"
         },
-        "ErrMsg": {
+        "errMsg": {
           "type": "string"
         }
       }

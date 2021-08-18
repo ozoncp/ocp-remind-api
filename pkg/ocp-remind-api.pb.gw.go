@@ -77,14 +77,14 @@ func request_RemindApiV1_DescribeRemind_0(ctx context.Context, marshaler runtime
 		_   = err
 	)
 
-	val, ok = pathParams["RemindId"]
+	val, ok = pathParams["remind_id"]
 	if !ok {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "RemindId")
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "remind_id")
 	}
 
 	protoReq.RemindId, err = runtime.Uint64(val)
 	if err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "RemindId", err)
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "remind_id", err)
 	}
 
 	msg, err := client.DescribeRemind(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
@@ -103,14 +103,14 @@ func local_request_RemindApiV1_DescribeRemind_0(ctx context.Context, marshaler r
 		_   = err
 	)
 
-	val, ok = pathParams["RemindId"]
+	val, ok = pathParams["remind_id"]
 	if !ok {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "RemindId")
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "remind_id")
 	}
 
 	protoReq.RemindId, err = runtime.Uint64(val)
 	if err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "RemindId", err)
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "remind_id", err)
 	}
 
 	msg, err := server.DescribeRemind(ctx, &protoReq)
@@ -207,7 +207,7 @@ func RegisterRemindApiV1HandlerServer(ctx context.Context, mux *runtime.ServeMux
 		var stream runtime.ServerTransportStream
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/ocp.reminds.api.RemindApiV1/DescribeRemind", runtime.WithHTTPPathPattern("/v1/describe/{RemindId}"))
+		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/ocp.reminds.api.RemindApiV1/DescribeRemind", runtime.WithHTTPPathPattern("/v1/describe/{remind_id}"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -335,7 +335,7 @@ func RegisterRemindApiV1HandlerClient(ctx context.Context, mux *runtime.ServeMux
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/ocp.reminds.api.RemindApiV1/DescribeRemind", runtime.WithHTTPPathPattern("/v1/describe/{RemindId}"))
+		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/ocp.reminds.api.RemindApiV1/DescribeRemind", runtime.WithHTTPPathPattern("/v1/describe/{remind_id}"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -397,7 +397,7 @@ func RegisterRemindApiV1HandlerClient(ctx context.Context, mux *runtime.ServeMux
 var (
 	pattern_RemindApiV1_CreateRemind_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1}, []string{"v1", "create"}, ""))
 
-	pattern_RemindApiV1_DescribeRemind_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 1, 0, 4, 1, 5, 2}, []string{"v1", "describe", "RemindId"}, ""))
+	pattern_RemindApiV1_DescribeRemind_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 1, 0, 4, 1, 5, 2}, []string{"v1", "describe", "remind_id"}, ""))
 
 	pattern_RemindApiV1_ListReminds_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1}, []string{"v1", "list"}, ""))
 

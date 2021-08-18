@@ -1,4 +1,4 @@
-FROM ubuntu AS builder
+FROM ubuntu:21.04 AS builder
 
 RUN apt update -y
 RUN apt upgrade -y
@@ -17,7 +17,7 @@ USER developer
 
 RUN echo developer | sudo -S DEBIAN_FRONTEND="noninteractive" apt install -y golang
 RUN echo developer | sudo -S apt install -y ca-certificates && sudo update-ca-certificates
-RUN echo developer | sudo -S apt install -y make git vim protobuf-compiler curl
+RUN echo developer | sudo -S apt install -y make git vim protobuf-compiler
 
 ENV GOPATH /home/developer/go
 ENV PATH $PATH:/home/developer/go/bin
@@ -27,7 +27,7 @@ RUN echo developer | sudo -S chown -R developer /home/developer/
 
 WORKDIR /home/developer/go/src/github.com/ozoncp/ocp-remind-api
 
-RUN make deps && make all
+RUN make deps && make build
 
 FROM alpine:latest
 RUN apk --no-cache add ca-certificates
