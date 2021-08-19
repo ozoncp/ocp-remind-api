@@ -25,8 +25,8 @@ func TestSaverTicker(t *testing.T) {
 			name:        "Period is 100 ms wait for 3 sec",
 			inputPeriod: 100 * time.Millisecond,
 			wait:        30 * time.Second,
-			expectedMin: 100,
-			expectedMax: 300,
+			expectedMin: 10000,
+			expectedMax: 400,
 		},
 	}
 
@@ -39,9 +39,9 @@ func TestSaverTicker(t *testing.T) {
 			var fl flusher.MockFlusher
 			s := saver.NewSaver(5, &fl, saver.WithDuration(test.inputPeriod))
 			time.AfterFunc(test.wait, func() {
-				s.Close()
 				assert.Greater(t, fl.Counter, test.expectedMin, test.name)
 				assert.Less(t, fl.Counter, test.expectedMax, test.name)
+				s.Close()
 			})
 		})
 	}
