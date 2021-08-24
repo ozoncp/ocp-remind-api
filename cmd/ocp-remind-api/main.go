@@ -1,12 +1,16 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"net"
+	"net/http"
 	"os"
-	"sync"
+	"os/signal"
+	"syscall"
 
 	"github.com/rs/zerolog/log"
+	"golang.org/x/sync/errgroup"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
 
@@ -39,17 +43,39 @@ func LoadConfiguration(filePath string) error {
 }
 
 func run() error {
+	c := make(chan os.Signal, 1)
+	signal.Notify(c, syscall.SIGINT, syscall.SIGTERM)
+
+	_, cancel := context.WithCancel(context.Background())
+	var grp errgroup.Group
+
 	listen, err := net.Listen("tcp4", ":82")
 	if err != nil {
 		log.Err(err).Msg("failed to listen")
 	}
 
 	s := grpc.NewServer()
-	pkg.RegisterRemindApiV1Server(s, ocpremindapi.NewRemindAPIV1())
+	api, err := ocpremindapi.NewRemindAPIV1()
+	if err != nil {
+		cancel()
+		return err
+	}
+	pkg.RegisterRemindApiV1Server(s, api)
 	reflection.Register(s)
 
 	if err := s.Serve(listen); err != nil {
 		log.Err(err).Msg("failed to serve")
+	}
+
+	osSignal := <-c
+	log.Info().Msgf("system syscall:%+v", osSignal)
+
+	s.GracefulStop()
+
+	cancel()
+
+	if err = grp.Wait(); err != http.ErrServerClosed {
+		log.Fatal().Msgf("server shutdown failed: %v", err)
 	}
 
 	return nil
@@ -57,10 +83,9 @@ func run() error {
 
 func main() {
 	log.Printf("ocp remind api project")
-
-	exitDone := &sync.WaitGroup{}
-	exitDone.Add(1)
-
+	//dbConn := db.Connect("postgres://postgres:postgres@localhost:5432/postgres?sslmode=disable")
+	//exitDone := &sync.WaitGroup{}
+	//exitDone.Add(1)
 	if err := run(); err != nil {
 		log.Err(err).Msg("failed to run")
 	}

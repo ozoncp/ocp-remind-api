@@ -45,3 +45,7 @@ build: deps
 	go install github.com/grpc-ecosystem/grpc-gateway/v2/protoc-gen-grpc-gateway@v2.5.0
 	go install github.com/grpc-ecosystem/grpc-gateway/v2/protoc-gen-openapiv2@v2.5.0
 	go install github.com/envoyproxy/protoc-gen-validate@$(PGV_VERSION)
+
+.PHONY: migrate
+migrate:
+	goose -dir ./migrations postgres "postgres://postgres:postgres@127.0.0.1:5432/reminds?sslmode=disable" up

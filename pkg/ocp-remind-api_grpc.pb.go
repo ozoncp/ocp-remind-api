@@ -19,10 +19,10 @@ const _ = grpc.SupportPackageIsVersion7
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type RemindApiV1Client interface {
-	CreateRemind(ctx context.Context, in *CreateRemindRequest, opts ...grpc.CallOption) (*Remind, error)
+	CreateRemind(ctx context.Context, in *CreateRemindRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	DescribeRemind(ctx context.Context, in *DescribeRemindRequest, opts ...grpc.CallOption) (*Remind, error)
-	ListReminds(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*ListRemindsResponse, error)
-	RemoveRemind(ctx context.Context, in *RemoveRemindRequest, opts ...grpc.CallOption) (*RemoveRemindResponse, error)
+	ListReminds(ctx context.Context, in *ListRemindsRequest, opts ...grpc.CallOption) (*ListRemindsResponse, error)
+	RemoveRemind(ctx context.Context, in *RemoveRemindRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 }
 
 type remindApiV1Client struct {
@@ -33,8 +33,8 @@ func NewRemindApiV1Client(cc grpc.ClientConnInterface) RemindApiV1Client {
 	return &remindApiV1Client{cc}
 }
 
-func (c *remindApiV1Client) CreateRemind(ctx context.Context, in *CreateRemindRequest, opts ...grpc.CallOption) (*Remind, error) {
-	out := new(Remind)
+func (c *remindApiV1Client) CreateRemind(ctx context.Context, in *CreateRemindRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
+	out := new(emptypb.Empty)
 	err := c.cc.Invoke(ctx, "/ocp.reminds.api.RemindApiV1/CreateRemind", in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -51,7 +51,7 @@ func (c *remindApiV1Client) DescribeRemind(ctx context.Context, in *DescribeRemi
 	return out, nil
 }
 
-func (c *remindApiV1Client) ListReminds(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*ListRemindsResponse, error) {
+func (c *remindApiV1Client) ListReminds(ctx context.Context, in *ListRemindsRequest, opts ...grpc.CallOption) (*ListRemindsResponse, error) {
 	out := new(ListRemindsResponse)
 	err := c.cc.Invoke(ctx, "/ocp.reminds.api.RemindApiV1/ListReminds", in, out, opts...)
 	if err != nil {
@@ -60,8 +60,8 @@ func (c *remindApiV1Client) ListReminds(ctx context.Context, in *emptypb.Empty, 
 	return out, nil
 }
 
-func (c *remindApiV1Client) RemoveRemind(ctx context.Context, in *RemoveRemindRequest, opts ...grpc.CallOption) (*RemoveRemindResponse, error) {
-	out := new(RemoveRemindResponse)
+func (c *remindApiV1Client) RemoveRemind(ctx context.Context, in *RemoveRemindRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
+	out := new(emptypb.Empty)
 	err := c.cc.Invoke(ctx, "/ocp.reminds.api.RemindApiV1/RemoveRemind", in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -73,10 +73,10 @@ func (c *remindApiV1Client) RemoveRemind(ctx context.Context, in *RemoveRemindRe
 // All implementations must embed UnimplementedRemindApiV1Server
 // for forward compatibility
 type RemindApiV1Server interface {
-	CreateRemind(context.Context, *CreateRemindRequest) (*Remind, error)
+	CreateRemind(context.Context, *CreateRemindRequest) (*emptypb.Empty, error)
 	DescribeRemind(context.Context, *DescribeRemindRequest) (*Remind, error)
-	ListReminds(context.Context, *emptypb.Empty) (*ListRemindsResponse, error)
-	RemoveRemind(context.Context, *RemoveRemindRequest) (*RemoveRemindResponse, error)
+	ListReminds(context.Context, *ListRemindsRequest) (*ListRemindsResponse, error)
+	RemoveRemind(context.Context, *RemoveRemindRequest) (*emptypb.Empty, error)
 	mustEmbedUnimplementedRemindApiV1Server()
 }
 
@@ -84,16 +84,16 @@ type RemindApiV1Server interface {
 type UnimplementedRemindApiV1Server struct {
 }
 
-func (UnimplementedRemindApiV1Server) CreateRemind(context.Context, *CreateRemindRequest) (*Remind, error) {
+func (UnimplementedRemindApiV1Server) CreateRemind(context.Context, *CreateRemindRequest) (*emptypb.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CreateRemind not implemented")
 }
 func (UnimplementedRemindApiV1Server) DescribeRemind(context.Context, *DescribeRemindRequest) (*Remind, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DescribeRemind not implemented")
 }
-func (UnimplementedRemindApiV1Server) ListReminds(context.Context, *emptypb.Empty) (*ListRemindsResponse, error) {
+func (UnimplementedRemindApiV1Server) ListReminds(context.Context, *ListRemindsRequest) (*ListRemindsResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ListReminds not implemented")
 }
-func (UnimplementedRemindApiV1Server) RemoveRemind(context.Context, *RemoveRemindRequest) (*RemoveRemindResponse, error) {
+func (UnimplementedRemindApiV1Server) RemoveRemind(context.Context, *RemoveRemindRequest) (*emptypb.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method RemoveRemind not implemented")
 }
 func (UnimplementedRemindApiV1Server) mustEmbedUnimplementedRemindApiV1Server() {}
@@ -146,7 +146,7 @@ func _RemindApiV1_DescribeRemind_Handler(srv interface{}, ctx context.Context, d
 }
 
 func _RemindApiV1_ListReminds_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(emptypb.Empty)
+	in := new(ListRemindsRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -158,7 +158,7 @@ func _RemindApiV1_ListReminds_Handler(srv interface{}, ctx context.Context, dec 
 		FullMethod: "/ocp.reminds.api.RemindApiV1/ListReminds",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(RemindApiV1Server).ListReminds(ctx, req.(*emptypb.Empty))
+		return srv.(RemindApiV1Server).ListReminds(ctx, req.(*ListRemindsRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }

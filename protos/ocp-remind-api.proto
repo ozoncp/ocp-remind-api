@@ -9,7 +9,7 @@ import "google/protobuf/timestamp.proto";
 
 
 service RemindApiV1{
-  rpc CreateRemind(CreateRemindRequest) returns (Remind){
+  rpc CreateRemind(CreateRemindRequest) returns (google.protobuf.Empty){
     option (google.api.http) = {
       post: "/v1/create"
       body: "*"
@@ -22,30 +22,32 @@ service RemindApiV1{
     };
   }
 
-  rpc ListReminds(google.protobuf.Empty) returns (ListRemindsResponse){
+  rpc ListReminds(ListRemindsRequest) returns (ListRemindsResponse){
     option (google.api.http) = {
       post: "/v1/list"
     };
   }
 
-  rpc RemoveRemind(RemoveRemindRequest) returns (RemoveRemindResponse){
+  rpc RemoveRemind(RemoveRemindRequest) returns (google.protobuf.Empty){
     option (google.api.http) = {
      delete: "/v1/remove"
     };
   }
 }
 
-message RemoveRemindResponse{
-  bool result = 1;
-  optional string err_msg = 2;
-}
 
 message RemoveRemindRequest{
   uint64 id = 1;
+  uint64 user_id = 2;
+}
+
+message ListRemindsRequest{
+  uint64 limit = 1;
+  uint64 offset = 2;
 }
 
 message ListRemindsResponse{
-  repeated uint64 ids = 1;
+  repeated Remind reminds = 1;
 }
 
 message DescribeRemindRequest{
@@ -56,6 +58,7 @@ message CreateRemindRequest{
   uint64 user_id = 1;
   string text = 2;
   google.protobuf.Timestamp time = 3;
+  uint64 remind_id = 4;
 }
 
 message Remind{
