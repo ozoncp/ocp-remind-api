@@ -4,6 +4,7 @@ import (
 	"context"
 	"time"
 
+	"github.com/jackc/pgx/v4"
 	"github.com/rs/zerolog/log"
 	"google.golang.org/protobuf/types/known/emptypb"
 
@@ -17,8 +18,8 @@ type RemindAPIV1 struct {
 	r repository.RemindsRepo
 }
 
-func NewRemindAPIV1() (*RemindAPIV1, error) {
-	repo, err := repository.NewRemindDBRepository()
+func NewRemindAPIV1(conn *pgx.Conn) (*RemindAPIV1, error) {
+	repo, err := repository.NewRemindDBRepository(conn)
 	if err != nil {
 		return nil, err
 	}
@@ -27,7 +28,7 @@ func NewRemindAPIV1() (*RemindAPIV1, error) {
 	}, nil
 }
 
-func (api *RemindAPIV1) CreateRemind(ctx context.Context, req *pkg.CreateRemindRequest) (*emptypb.Empty, error) {
+func (api RemindAPIV1) CreateRemind(_ context.Context, req *pkg.CreateRemindRequest) (*emptypb.Empty, error) {
 	log.Printf("Create request: %v", req)
 
 	reminds := make([]models.Remind, 1)
@@ -38,16 +39,16 @@ func (api *RemindAPIV1) CreateRemind(ctx context.Context, req *pkg.CreateRemindR
 		Text:     req.Text,
 	}
 
-	err := api.r.Add(ctx, reminds)
+	err := api.r.Add(reminds)
 	if err != nil {
 		return nil, err
 	}
 
 	return &emptypb.Empty{}, nil
 }
-func (api *RemindAPIV1) DescribeRemind(ctx context.Context, req *pkg.DescribeRemindRequest) (*pkg.Remind, error) {
+func (api RemindAPIV1) DescribeRemind(_ context.Context, req *pkg.DescribeRemindRequest) (*pkg.Remind, error) {
 	log.Printf("Descibe request: %v", req)
-	describe, err := api.r.Describe(ctx, req.RemindId)
+	describe, err := api.r.Describe(req.RemindId)
 	if err != nil {
 		return nil, err
 	}
@@ -60,9 +61,9 @@ func (api *RemindAPIV1) DescribeRemind(ctx context.Context, req *pkg.DescribeRem
 	}, nil
 }
 
-func (api *RemindAPIV1) ListReminds(ctx context.Context, req *pkg.ListRemindsRequest) (*pkg.ListRemindsResponse, error) {
+func (api RemindAPIV1) ListReminds(_ context.Context, req *pkg.ListRemindsRequest) (*pkg.ListRemindsResponse, error) {
 	log.Printf("List request: %v", req)
-	reminds, err := api.r.List(ctx, req.Limit, req.Offset)
+	reminds, err := api.r.List(req.Limit, req.Offset)
 	if err != nil {
 		return nil, err
 	}
@@ -81,9 +82,9 @@ func (api *RemindAPIV1) ListReminds(ctx context.Context, req *pkg.ListRemindsReq
 	return &resp, nil
 }
 
-func (api *RemindAPIV1) RemoveRemind(ctx context.Context, req *pkg.RemoveRemindRequest) (*emptypb.Empty, error) {
+func (api RemindAPIV1) RemoveRemind(_ context.Context, req *pkg.RemoveRemindRequest) (*emptypb.Empty, error) {
 	log.Printf("Remove request: %v", req)
-	err := api.r.Remove(ctx, req.Id, req.UserId)
+	err := api.r.Remove(req.Id, req.UserId)
 	if err != nil {
 		return nil, err
 	}

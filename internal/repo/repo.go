@@ -2,27 +2,25 @@ package repo
 
 import (
 	"context"
-	"os"
 
 	"github.com/Masterminds/squirrel"
 	"github.com/jackc/pgx/v4"
-	"github.com/rs/zerolog/log"
 
 	"github.com/ozoncp/ocp-remind-api/internal/models"
 )
 
 type RemindsRepo interface {
-	Add(ctx context.Context, remind []models.Remind) error
-	Describe(ctx context.Context, id uint64) (*models.Remind, error)
-	List(ctx context.Context, limit, offset uint64) ([]models.Remind, error)
-	Remove(ctx context.Context, id, user_id uint64) error
+	Add(remind []models.Remind) error
+	Describe(id uint64) (*models.Remind, error)
+	List(limit, offset uint64) ([]models.Remind, error)
+	Remove(id, user_id uint64) error
 }
 
 type RemindDBRepository struct {
 	db *pgx.Conn
 }
 
-func (r *RemindDBRepository) Add(ctx context.Context, reminds []models.Remind) error {
+func (r *RemindDBRepository) Add(reminds []models.Remind) error {
 	query := squirrel.Insert("reminds").
 		Columns("remind_id", "user_id", "deadline", "message")
 
@@ -33,7 +31,7 @@ func (r *RemindDBRepository) Add(ctx context.Context, reminds []models.Remind) e
 	if err != nil {
 		return err
 	}
-	_, err = r.db.Exec(ctx, sql, args...)
+	_, err = r.db.Exec(context.Background(), sql, args...)
 	if err != nil {
 		return err
 	}
@@ -41,7 +39,7 @@ func (r *RemindDBRepository) Add(ctx context.Context, reminds []models.Remind) e
 	return nil
 }
 
-func (r *RemindDBRepository) Describe(ctx context.Context, id uint64) (*models.Remind, error) {
+func (r *RemindDBRepository) Describe(id uint64) (*models.Remind, error) {
 	var remind models.Remind
 	query := squirrel.Select("remind_id", "user_id", "deadline", "message").
 		From("reminds").
@@ -52,7 +50,7 @@ func (r *RemindDBRepository) Describe(ctx context.Context, id uint64) (*models.R
 	if err != nil {
 		return nil, err
 	}
-	err = r.db.QueryRow(ctx, sql, args...).Scan(&remind.Id, &remind.UserId, &remind.Deadline, &remind.Text)
+	err = r.db.QueryRow(context.Background(), sql, args...).Scan(&remind.Id, &remind.UserId, &remind.Deadline, &remind.Text)
 	if err != nil {
 		return nil, err
 	}
@@ -60,7 +58,7 @@ func (r *RemindDBRepository) Describe(ctx context.Context, id uint64) (*models.R
 	return &remind, nil
 }
 
-func (r *RemindDBRepository) List(ctx context.Context, limit, offset uint64) ([]models.Remind, error) {
+func (r *RemindDBRepository) List(limit, offset uint64) ([]models.Remind, error) {
 	sql, args, err := squirrel.Select("remind_id", "user_id", "deadline", "message").
 		From("reminds").
 		Limit(limit).
@@ -69,7 +67,7 @@ func (r *RemindDBRepository) List(ctx context.Context, limit, offset uint64) ([]
 	if err != nil {
 		return nil, err
 	}
-	rows, err := r.db.Query(ctx, sql, args...)
+	rows, err := r.db.Query(context.Background(), sql, args...)
 	if err != nil {
 		return nil, err
 	}
@@ -88,7 +86,7 @@ func (r *RemindDBRepository) List(ctx context.Context, limit, offset uint64) ([]
 	return lists, err
 }
 
-func (r *RemindDBRepository) Remove(ctx context.Context, id, user_id uint64) error {
+func (r *RemindDBRepository) Remove(id, user_id uint64) error {
 	sql, args, err := squirrel.Delete("reminds").
 		Where(
 			squirrel.And{
@@ -101,24 +99,14 @@ func (r *RemindDBRepository) Remove(ctx context.Context, id, user_id uint64) err
 		return err
 	}
 
-	_, err = r.db.Exec(ctx, sql, args...)
+	_, err = r.db.Exec(context.Background(), sql, args...)
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
-func NewRemindDBRepository() (*RemindDBRepository, error) {
-	conn, err := pgx.Connect(context.Background(), os.Getenv("REMINDS_DB_URL"))
-	if err != nil {
-		log.Err(err).Msg("Unable to connect to db")
-		return nil, err
-	}
-	//defer func(conn *pgx.Conn, ctx context.Context) {
-	//	err := conn.Close(ctx)
-	//	if err != nil {
-	//		log.Err(err).Msg("Unable to close connection to db")
-	//	}
-	//}(conn, context.Background())
+func NewRemindDBRepository(conn *pgx.Conn) (*RemindDBRepository, error) {
+
 	return &RemindDBRepository{db: conn}, nil
 }

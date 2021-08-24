@@ -77,3 +77,17 @@ func (mr *MockRemindsRepoMockRecorder) List(arg0, arg1 interface{}) *gomock.Call
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "List", reflect.TypeOf((*MockRemindsRepo)(nil).List), arg0, arg1)
 }
+
+// Remove mocks base method.
+func (m *MockRemindsRepo) Remove(arg0, arg1 uint64) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Remove", arg0, arg1)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// Remove indicates an expected call of Remove.
+func (mr *MockRemindsRepoMockRecorder) Remove(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Remove", reflect.TypeOf((*MockRemindsRepo)(nil).Remove), arg0, arg1)
+}
