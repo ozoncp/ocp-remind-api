@@ -1,11 +1,14 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"net"
 	"os"
-	"sync"
+	"os/signal"
+	"syscall"
 
+	"github.com/jackc/pgx/v4"
 	"github.com/rs/zerolog/log"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
@@ -39,28 +42,49 @@ func LoadConfiguration(filePath string) error {
 }
 
 func run() error {
+	var _ pkg.RemindApiV1Server = (*ocpremindapi.RemindAPIV1)(nil)
+	c := make(chan os.Signal, 1)
+	signal.Notify(c, syscall.SIGINT, syscall.SIGTERM)
+
 	listen, err := net.Listen("tcp4", ":82")
 	if err != nil {
 		log.Err(err).Msg("failed to listen")
 	}
 
+	conn, err := pgx.Connect(context.Background(), os.Getenv("REMINDS_DB_URL"))
+	if err != nil {
+		log.Err(err).Msg("Unable to connect to db")
+		return err
+	}
+	defer func(ctx context.Context, conn *pgx.Conn) {
+		err := conn.Close(ctx)
+		if err != nil {
+			log.Err(err).Msg("Unable to close connection to db")
+		}
+	}(context.Background(), conn)
+
 	s := grpc.NewServer()
-	pkg.RegisterRemindApiV1Server(s, ocpremindapi.NewRemindAPIV1())
+	api, err := ocpremindapi.NewRemindAPIV1(conn)
+	if err != nil {
+		return err
+	}
+	pkg.RegisterRemindApiV1Server(s, api)
 	reflection.Register(s)
 
 	if err := s.Serve(listen); err != nil {
 		log.Err(err).Msg("failed to serve")
 	}
 
+	osSignal := <-c
+	log.Info().Msgf("system syscall:%+v", osSignal)
+
+	s.GracefulStop()
+
 	return nil
 }
 
 func main() {
 	log.Printf("ocp remind api project")
-
-	exitDone := &sync.WaitGroup{}
-	exitDone.Add(1)
-
 	if err := run(); err != nil {
 		log.Err(err).Msg("failed to run")
 	}

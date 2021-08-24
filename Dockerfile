@@ -22,6 +22,7 @@ RUN echo developer | sudo -S apt install -y make git vim protobuf-compiler
 ENV GOPATH /home/developer/go
 ENV PATH $PATH:/home/developer/go/bin
 
+
 COPY . /home/developer/go/src/github.com/ozoncp/ocp-remind-api
 RUN echo developer | sudo -S chown -R developer /home/developer/
 
@@ -32,6 +33,7 @@ RUN make deps && make build
 FROM alpine:latest
 RUN apk --no-cache add ca-certificates
 WORKDIR /root/
+ENV REMINDS_DB_URL postres://postgres:postgres@localhost:5432/reminds?sslmode=none
 COPY --from=builder /home/developer/go/src/github.com/ozoncp/ocp-remind-api/bin/ocp-remind-api .
 RUN chown root:root ocp-remind-api
 EXPOSE 82
