@@ -6,12 +6,20 @@ option go_package = "github.com/ozoncp/ocp-remind-api/pkg";
 import "google/api/annotations.proto";
 import "google/protobuf/empty.proto";
 import "google/protobuf/timestamp.proto";
+import"google/protobuf/wrappers.proto";
 
 
 service RemindApiV1{
   rpc CreateRemind(CreateRemindRequest) returns (google.protobuf.Empty){
     option (google.api.http) = {
       post: "/v1/create"
+      body: "*"
+    };
+  }
+
+  rpc MultiCreateRemind(MultiCreateRemindsRequest) returns (google.protobuf.Empty){
+    option (google.api.http) = {
+      post: "/v1/multicreate"
       body: "*"
     };
   }
@@ -33,6 +41,12 @@ service RemindApiV1{
      delete: "/v1/remove"
     };
   }
+  rpc UpdateRemind(Remind) returns (google.protobuf.Empty){
+    option (google.api.http) = {
+      post: "/v1/update"
+    };
+  }
+
 }
 
 
@@ -54,6 +68,10 @@ message DescribeRemindRequest{
   uint64 remind_id = 1;
 }
 
+message MultiCreateRemindsRequest{
+  repeated CreateRemindRequest reminds = 1;
+}
+
 message CreateRemindRequest{
   uint64 user_id = 1;
   string text = 2;
@@ -65,5 +83,5 @@ message Remind{
   uint64 id = 1;
   uint64 user_id = 2;
   string text = 3;
-  int64 unix_time = 4;
+  google.protobuf.Timestamp time = 4;
 }

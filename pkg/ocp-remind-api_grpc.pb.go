@@ -20,9 +20,11 @@ const _ = grpc.SupportPackageIsVersion7
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type RemindApiV1Client interface {
 	CreateRemind(ctx context.Context, in *CreateRemindRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
+	MultiCreateRemind(ctx context.Context, in *MultiCreateRemindsRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	DescribeRemind(ctx context.Context, in *DescribeRemindRequest, opts ...grpc.CallOption) (*Remind, error)
 	ListReminds(ctx context.Context, in *ListRemindsRequest, opts ...grpc.CallOption) (*ListRemindsResponse, error)
 	RemoveRemind(ctx context.Context, in *RemoveRemindRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
+	UpdateRemind(ctx context.Context, in *Remind, opts ...grpc.CallOption) (*emptypb.Empty, error)
 }
 
 type remindApiV1Client struct {
@@ -36,6 +38,15 @@ func NewRemindApiV1Client(cc grpc.ClientConnInterface) RemindApiV1Client {
 func (c *remindApiV1Client) CreateRemind(ctx context.Context, in *CreateRemindRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
 	out := new(emptypb.Empty)
 	err := c.cc.Invoke(ctx, "/ocp.reminds.api.RemindApiV1/CreateRemind", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *remindApiV1Client) MultiCreateRemind(ctx context.Context, in *MultiCreateRemindsRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
+	out := new(emptypb.Empty)
+	err := c.cc.Invoke(ctx, "/ocp.reminds.api.RemindApiV1/MultiCreateRemind", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -69,14 +80,25 @@ func (c *remindApiV1Client) RemoveRemind(ctx context.Context, in *RemoveRemindRe
 	return out, nil
 }
 
+func (c *remindApiV1Client) UpdateRemind(ctx context.Context, in *Remind, opts ...grpc.CallOption) (*emptypb.Empty, error) {
+	out := new(emptypb.Empty)
+	err := c.cc.Invoke(ctx, "/ocp.reminds.api.RemindApiV1/UpdateRemind", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // RemindApiV1Server is the server API for RemindApiV1 service.
 // All implementations must embed UnimplementedRemindApiV1Server
 // for forward compatibility
 type RemindApiV1Server interface {
 	CreateRemind(context.Context, *CreateRemindRequest) (*emptypb.Empty, error)
+	MultiCreateRemind(context.Context, *MultiCreateRemindsRequest) (*emptypb.Empty, error)
 	DescribeRemind(context.Context, *DescribeRemindRequest) (*Remind, error)
 	ListReminds(context.Context, *ListRemindsRequest) (*ListRemindsResponse, error)
 	RemoveRemind(context.Context, *RemoveRemindRequest) (*emptypb.Empty, error)
+	UpdateRemind(context.Context, *Remind) (*emptypb.Empty, error)
 	mustEmbedUnimplementedRemindApiV1Server()
 }
 
@@ -87,6 +109,9 @@ type UnimplementedRemindApiV1Server struct {
 func (UnimplementedRemindApiV1Server) CreateRemind(context.Context, *CreateRemindRequest) (*emptypb.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CreateRemind not implemented")
 }
+func (UnimplementedRemindApiV1Server) MultiCreateRemind(context.Context, *MultiCreateRemindsRequest) (*emptypb.Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method MultiCreateRemind not implemented")
+}
 func (UnimplementedRemindApiV1Server) DescribeRemind(context.Context, *DescribeRemindRequest) (*Remind, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DescribeRemind not implemented")
 }
@@ -95,6 +120,9 @@ func (UnimplementedRemindApiV1Server) ListReminds(context.Context, *ListRemindsR
 }
 func (UnimplementedRemindApiV1Server) RemoveRemind(context.Context, *RemoveRemindRequest) (*emptypb.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method RemoveRemind not implemented")
+}
+func (UnimplementedRemindApiV1Server) UpdateRemind(context.Context, *Remind) (*emptypb.Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UpdateRemind not implemented")
 }
 func (UnimplementedRemindApiV1Server) mustEmbedUnimplementedRemindApiV1Server() {}
 
@@ -123,6 +151,24 @@ func _RemindApiV1_CreateRemind_Handler(srv interface{}, ctx context.Context, dec
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(RemindApiV1Server).CreateRemind(ctx, req.(*CreateRemindRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _RemindApiV1_MultiCreateRemind_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(MultiCreateRemindsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(RemindApiV1Server).MultiCreateRemind(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/ocp.reminds.api.RemindApiV1/MultiCreateRemind",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(RemindApiV1Server).MultiCreateRemind(ctx, req.(*MultiCreateRemindsRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -181,6 +227,24 @@ func _RemindApiV1_RemoveRemind_Handler(srv interface{}, ctx context.Context, dec
 	return interceptor(ctx, in, info, handler)
 }
 
+func _RemindApiV1_UpdateRemind_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(Remind)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(RemindApiV1Server).UpdateRemind(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/ocp.reminds.api.RemindApiV1/UpdateRemind",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(RemindApiV1Server).UpdateRemind(ctx, req.(*Remind))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // RemindApiV1_ServiceDesc is the grpc.ServiceDesc for RemindApiV1 service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -193,6 +257,10 @@ var RemindApiV1_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _RemindApiV1_CreateRemind_Handler,
 		},
 		{
+			MethodName: "MultiCreateRemind",
+			Handler:    _RemindApiV1_MultiCreateRemind_Handler,
+		},
+		{
 			MethodName: "DescribeRemind",
 			Handler:    _RemindApiV1_DescribeRemind_Handler,
 		},
@@ -203,6 +271,10 @@ var RemindApiV1_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "RemoveRemind",
 			Handler:    _RemindApiV1_RemoveRemind_Handler,
+		},
+		{
+			MethodName: "UpdateRemind",
+			Handler:    _RemindApiV1_UpdateRemind_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

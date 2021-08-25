@@ -14,6 +14,7 @@ type RemindsRepo interface {
 	Describe(id uint64) (*models.Remind, error)
 	List(limit, offset uint64) ([]models.Remind, error)
 	Remove(id, user_id uint64) error
+	Update(remind models.Remind) error
 }
 
 type RemindDBRepository struct {
@@ -86,6 +87,25 @@ func (r *RemindDBRepository) List(limit, offset uint64) ([]models.Remind, error)
 	return lists, err
 }
 
+func (r *RemindDBRepository) Update(remind models.Remind) error {
+	sql, args, err := squirrel.Update("reminds").
+		Set("remind_id", remind.Id).
+		Set("user_id", remind.UserId).
+		Set("deadline", remind.Deadline).
+		Set("message", remind.Text).
+		PlaceholderFormat(squirrel.Dollar).
+		ToSql()
+	if err != nil {
+		return err
+	}
+
+	_, err = r.db.Exec(context.Background(), sql, args...)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
 func (r *RemindDBRepository) Remove(id, user_id uint64) error {
 	sql, args, err := squirrel.Delete("reminds").
 		Where(
@@ -107,6 +127,5 @@ func (r *RemindDBRepository) Remove(id, user_id uint64) error {
 }
 
 func NewRemindDBRepository(conn *pgx.Conn) (*RemindDBRepository, error) {
-
 	return &RemindDBRepository{db: conn}, nil
 }
