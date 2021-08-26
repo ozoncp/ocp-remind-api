@@ -101,6 +101,38 @@
         ]
       }
     },
+    "/v1/multicreate": {
+      "post": {
+        "operationId": "RemindApiV1_MultiCreateRemind",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "properties": {}
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/apiMultiCreateRemindsRequest"
+            }
+          }
+        ],
+        "tags": [
+          "RemindApiV1"
+        ]
+      }
+    },
     "/v1/remove": {
       "delete": {
         "operationId": "RemindApiV1_RemoveRemind",
@@ -134,6 +166,28 @@
             "format": "uint64"
           }
         ],
+        "tags": [
+          "RemindApiV1"
+        ]
+      }
+    },
+    "/v1/update": {
+      "post": {
+        "operationId": "RemindApiV1_UpdateRemind",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "properties": {}
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
         "tags": [
           "RemindApiV1"
         ]
@@ -172,6 +226,17 @@
         }
       }
     },
+    "apiMultiCreateRemindsRequest": {
+      "type": "object",
+      "properties": {
+        "reminds": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/apiCreateRemindRequest"
+          }
+        }
+      }
+    },
     "apiRemind": {
       "type": "object",
       "properties": {
@@ -186,9 +251,9 @@
         "text": {
           "type": "string"
         },
-        "unixTime": {
+        "time": {
           "type": "string",
-          "format": "int64"
+          "format": "date-time"
         }
       }
     },

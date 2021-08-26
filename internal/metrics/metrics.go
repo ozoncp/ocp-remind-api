@@ -2,29 +2,23 @@ package metrics
 
 import (
 	"github.com/prometheus/client_golang/prometheus"
-	"github.com/prometheus/client_golang/prometheus/promauto"
 )
 
-var (
-	create,
-	update,
-	remove prometheus.Counter
+const (
+	UpdateEventLabel = "update"
+	CreateEventLabel = "create"
+	RemoveEventLabel = "remove"
 )
+
+var CounterCollector *prometheus.CounterVec
 
 func CreateMetrics() {
-	create = promauto.NewCounter(prometheus.CounterOpts{Name: "create_reminds_counter"})
-	update = promauto.NewCounter(prometheus.CounterOpts{Name: "update_reminds_counter"})
-	remove = promauto.NewCounter(prometheus.CounterOpts{Name: "remove_reminds_counter"})
-}
+	CounterCollector = prometheus.NewCounterVec(prometheus.CounterOpts{
+		Namespace: "reminds",
+		Name:      "CUD_counter",
+		Help:      "Counter with three event types",
+	}, []string{UpdateEventLabel, CreateEventLabel, RemoveEventLabel})
 
-func CreateCounterUp() {
-	create.Inc()
-}
-
-func UpdateCounterUp() {
-	update.Inc()
-}
-
-func RemoveCounterUp() {
-	remove.Inc()
+	var registerer = prometheus.DefaultRegisterer
+	registerer.MustRegister(CounterCollector)
 }

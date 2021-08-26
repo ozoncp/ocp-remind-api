@@ -63,7 +63,12 @@ func (api RemindAPIV1) CreateRemind(_ context.Context, req *pkg.CreateRemindRequ
 	if err != nil {
 		log.Error().Msgf("failed send to kafka: %v", err)
 	}
-	metrics.CreateCounterUp()
+	defer func() {
+		if err != nil {
+			return
+		}
+		metrics.CounterCollector.WithLabelValues(metrics.CreateEventLabel).Inc()
+	}()
 	return &emptypb.Empty{}, nil
 }
 func (api RemindAPIV1) DescribeRemind(_ context.Context, req *pkg.DescribeRemindRequest) (*pkg.Remind, error) {
@@ -114,13 +119,19 @@ func (api RemindAPIV1) RemoveRemind(_ context.Context, req *pkg.RemoveRemindRequ
 	err = api.p.Send(producer.CreateMessage(producer.Remove,
 		producer.EventMessage{
 			ID:        req.Id,
-			Action:    producer.Create.String(),
+			Action:    producer.Remove.String(),
 			Timestamp: time.Now().Unix(),
 		}))
 	if err != nil {
 		log.Error().Msgf("failed send to kafka: %v", err)
 	}
-	metrics.RemoveCounterUp()
+	defer func() {
+		if err != nil {
+			return
+		}
+		metrics.CounterCollector.WithLabelValues(metrics.RemoveEventLabel).Inc()
+	}()
+
 	return &emptypb.Empty{}, nil
 }
 
@@ -159,7 +170,6 @@ func (api RemindAPIV1) MultiCreateRemind(_ context.Context, req *pkg.MultiCreate
 
 func (api RemindAPIV1) UpdateRemind(_ context.Context, req *pkg.Remind) (*emptypb.Empty, error) {
 	log.Printf("Update request: %v", req)
-	metrics.UpdateCounterUp()
 	remind := models.Remind{
 		Text:     req.Text,
 		Id:       req.Id,
@@ -174,11 +184,18 @@ func (api RemindAPIV1) UpdateRemind(_ context.Context, req *pkg.Remind) (*emptyp
 	err = api.p.Send(producer.CreateMessage(producer.Update,
 		producer.EventMessage{
 			ID:        remind.Id,
-			Action:    producer.Create.String(),
+			Action:    producer.Update.String(),
 			Timestamp: time.Now().Unix(),
 		}))
 	if err != nil {
 		log.Error().Msgf("failed send to kafka :%v", err)
 	}
+	defer func() {
+		if err != nil {
+			return
+		}
+		metrics.CounterCollector.WithLabelValues(metrics.UpdateEventLabel).Inc()
+	}()
+
 	return &emptypb.Empty{}, nil
 }
