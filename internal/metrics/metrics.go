@@ -15,7 +15,7 @@ var CounterCollector *prometheus.CounterVec
 func CreateMetrics() {
 	CounterCollector = prometheus.NewCounterVec(prometheus.CounterOpts{
 		Namespace: "reminds",
-		Name:      "CUD_counter",
+		Name:      "processed_events_total",
 		Help:      "Counter with three event types",
 	}, []string{UpdateEventLabel, CreateEventLabel, RemoveEventLabel})
 
