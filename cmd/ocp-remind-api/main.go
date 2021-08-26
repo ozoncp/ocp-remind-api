@@ -4,16 +4,20 @@ import (
 	"context"
 	"fmt"
 	"net"
+	"net/http"
 	"os"
 	"os/signal"
 	"syscall"
 
 	"github.com/jackc/pgx/v4"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/rs/zerolog/log"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
 
 	ocpremindapi "github.com/ozoncp/ocp-remind-api/internal/app/ocp-remind-api"
+	"github.com/ozoncp/ocp-remind-api/internal/metrics"
+	"github.com/ozoncp/ocp-remind-api/internal/tracer"
 	"github.com/ozoncp/ocp-remind-api/pkg"
 )
 
@@ -46,7 +50,19 @@ func run() error {
 	c := make(chan os.Signal, 1)
 	signal.Notify(c, syscall.SIGINT, syscall.SIGTERM)
 
-	listen, err := net.Listen("tcp4", ":82")
+	mux := http.NewServeMux()
+	mux.Handle("jaeger", promhttp.Handler())
+
+	metricsSrv := &http.Server{
+		Addr:    "6831",
+		Handler: mux,
+	}
+
+	metrics.CreateMetrics()
+
+	tr := tracer.InitTracer("reminds")
+
+	listen, err := net.Listen("tcp4", ":82") //nolint:gosec
 	if err != nil {
 		log.Err(err).Msg("failed to listen")
 	}
@@ -77,8 +93,15 @@ func run() error {
 
 	osSignal := <-c
 	log.Info().Msgf("system syscall:%+v", osSignal)
-
+	err = metricsSrv.Close()
+	if err != nil {
+		log.Err(err).Msg("Error on close metrics server")
+	}
 	s.GracefulStop()
+	err = tr.Close()
+	if err != nil {
+		log.Err(err).Msg("Error on close tracer server")
+	}
 
 	return nil
 }
