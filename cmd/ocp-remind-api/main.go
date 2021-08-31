@@ -16,6 +16,7 @@ import (
 	"google.golang.org/grpc/reflection"
 
 	ocpremindapi "github.com/ozoncp/ocp-remind-api/internal/app/ocp-remind-api"
+	"github.com/ozoncp/ocp-remind-api/internal/configuration"
 	"github.com/ozoncp/ocp-remind-api/internal/metrics"
 	"github.com/ozoncp/ocp-remind-api/internal/tracer"
 	"github.com/ozoncp/ocp-remind-api/pkg"
@@ -46,15 +47,20 @@ func LoadConfiguration(filePath string) error {
 }
 
 func run() error {
+	err := configuration.Init(os.Getenv("REMINDS_CONF_FILENAME"))
+	if err != nil {
+		log.Fatal().Msg("failed to init configuration")
+		return err
+	}
 	var _ pkg.RemindApiV1Server = (*ocpremindapi.RemindAPIV1)(nil)
 	c := make(chan os.Signal, 1)
 	signal.Notify(c, syscall.SIGINT, syscall.SIGTERM)
 
 	mux := http.NewServeMux()
-	mux.Handle("jaeger", promhttp.Handler())
+	mux.Handle(configuration.Instance().Jaeger.Host, promhttp.Handler())
 
 	metricsSrv := &http.Server{
-		Addr:    "6831",
+		Addr:    configuration.Instance().Jaeger.Port,
 		Handler: mux,
 	}
 
@@ -62,12 +68,12 @@ func run() error {
 
 	tr := tracer.InitTracer("reminds")
 
-	listen, err := net.Listen("tcp4", ":82") //nolint:gosec
+	listen, err := net.Listen("tcp4", ":"+configuration.Instance().Grpc.Port) //nolint:gosec
 	if err != nil {
 		log.Err(err).Msg("failed to listen")
 	}
 
-	conn, err := pgx.Connect(context.Background(), os.Getenv("REMINDS_DB_URL"))
+	conn, err := pgx.Connect(context.Background(), configuration.DB.URI(configuration.Instance().DB))
 	if err != nil {
 		log.Err(err).Msg("Unable to connect to db")
 		return err

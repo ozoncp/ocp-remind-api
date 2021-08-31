@@ -6,6 +6,8 @@ import (
 
 	"github.com/Shopify/sarama"
 	"github.com/rs/zerolog/log"
+
+	"github.com/ozoncp/ocp-remind-api/internal/configuration"
 )
 
 // Producer - an interface for send event messages
@@ -25,7 +27,7 @@ func NewProducer() *producer {
 	config.Producer.Partitioner = sarama.NewRandomPartitioner
 	config.Producer.Return.Successes = true
 
-	syncProducer, err := sarama.NewSyncProducer([]string{"kafka:9092"}, config)
+	syncProducer, err := sarama.NewSyncProducer([]string{configuration.Instance().Kafka.URI()}, config)
 	if err != nil {
 		log.Err(err).Msg("failed to create Sarama new sync producer")
 	}

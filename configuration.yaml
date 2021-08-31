@@ -1,0 +1,17 @@
+Grpc:
+  port: ":8082"
+
+DB:
+  host: "postgres"
+  port: "5432"
+  user: "postgres"
+  password: "postgres"
+  database: "postgres"
+
+Jaeger:
+  host: "jaeger"
+  port: "6831"
+
+Kafka:
+  host: "kafka"
+  port: "9831"

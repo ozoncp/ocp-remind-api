@@ -33,7 +33,8 @@ RUN make deps && make build
 FROM alpine:latest
 RUN apk --no-cache add ca-certificates
 WORKDIR /root/
-ENV REMINDS_DB_URL postres://postgres:postgres@localhost:5432/reminds?sslmode=none
+#ENV REMINDS_DB_URL postres://postgres:postgres@localhost:5432/reminds?sslmode=none
+ENV REMINDS_CONF_FILENAME ../configuration.yaml
 COPY --from=builder /home/developer/go/src/github.com/ozoncp/ocp-remind-api/bin/ocp-remind-api .
 RUN chown root:root ocp-remind-api
 EXPOSE 82
